@@ -4,6 +4,7 @@ import random
 import math
 import json
 
+#INICIALIZAMOS LA LISTA DE ENTIDADES
 personas = []
 
 class Persona:
