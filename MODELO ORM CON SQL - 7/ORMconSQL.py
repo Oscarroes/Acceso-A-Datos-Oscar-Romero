@@ -14,14 +14,18 @@ class Persona:
         self.posy = random.randint(0,600)
         self.radio = 30
         self.direccion = random.randint(0,360)
-        self.velocidad = 50
+        self.velocidad = 10
         self.color = ""
         self.entidad = ""
-        #A medida que el personaje vaya avanzando va a ir perdiendo energía y descanso
+        #A medida que el personaje vaya avanzando va a ir perdiendo energía y descanso, pero ganando experiencia
         self.energia = 100
         self.descanso = 100
+        self.experiencia = 0
         self.entidadEnergia = ""
         self.entidadDescanso = ""
+        self.entidadExperiencia = ""
+        self.nivel = 1
+        self.entidadNivel = ""
     #DIBUJA LAS ENTIDADES = LES DAMOS COLOR Y UNA COORDENADA DE POSICIÓN
     def dibuja(self):
         self.entidad = lienzo.create_oval(
@@ -30,7 +34,7 @@ class Persona:
             self.posx+self.radio/2,
             self.posy+self.radio/2,
             fill=self.color)
-        #Vamos a dibujarles las barras de vida y energía y cosas así
+        #Vamos a dibujarles las barras de energía, descanso y experiencia
         self.entidadEnergia = lienzo.create_rectangle(
             self.posx-self.radio/2,
             self.posy-self.radio/2-14,
@@ -43,15 +47,49 @@ class Persona:
             self.posy-self.radio/2-22,
             self.posx+self.radio/2,
             self.posy-self.radio/2-16,
+            fill="red"
+            )
+        #Lienzo experiencia
+        self.entidadExperiencia = lienzo.create_rectangle(
+            self.posx+self.radio/2 + 8,
+            self.posy-self.radio/2,
+            self.posx+self.radio/2 + 14,
+            self.posy+self.radio/2,
             fill="yellow"
             )
+        # Texto de nivel
+        self.entidadNivel = lienzo.create_text(
+            self.posx + self.radio / 2 + 11,
+            self.posy,
+            text=str(round(self.nivel)),
+            fill="black"
+        )
     #DEFINE EL MOVIMIENTO DE LAS ENTIDADES Y LOS LÍMITES DEL CANVAS PARA QUE NO ESCAPEN
     def mueve(self):
-        #Al moverse van a ir perdiendo energía y descanso:
+        #Al moverse van a ir perdiendo energía y descanso, pero ganando experiencia:
+        #Recuperan la energía y el descanso en la zona verde
         if self.energia > 0:
             self.energia -= 0.075
+            if self.posx < 512 and self.posy > 300:
+                self.energia = 100
+
         if self.descanso > 0:
             self.descanso -= 0.05
+            if self.posx < 512 and self.posy > 300:
+                self.descanso = 100
+
+        #Ganan más experiencia en la zona roja
+        self.experiencia += 0.001
+        if self.posx > 512 and self.posy < 300:
+            self.experiencia += 0.002
+
+        #SI LA EXPERIENCIA ES MAYOR QUE 2 -> NIVEL +1 Y SELF.EXPERIENCIA = 0
+        if self.experiencia > 2:
+            self.nivel +=1
+            self.experiencia = 0
+            # Actualizar el texto del nivel después de aumentar
+            lienzo.itemconfig(self.entidadNivel, text=str(round(self.nivel)))
+        
         self.colisiona()
         self.cambiaColor()
         lienzo.move(self.entidad,
@@ -60,6 +98,8 @@ class Persona:
         #Las barras las vamos a mover con coordenadas referenciadas a la posición:
         anchuraDescanso = (self.descanso/100)*self.radio  
         anchuraEnergia = (self.energia/100)*self.radio
+        anchuraExperiencia = (self.experiencia-1)*self.radio
+
         lienzo.coords(self.entidadEnergia,
                     self.posx - self.radio/2,
                     self.posy - self.radio/2 - 14,
@@ -72,9 +112,20 @@ class Persona:
                     self.posx - self.radio/2 + anchuraDescanso,
                     self.posy - self.radio/2 - 16)
         
-        #Actualizar las posiciones:
+        lienzo.coords(self.entidadExperiencia,
+                    self.posx + self.radio/2 + 8,
+                    self.posy - self.radio/2 - anchuraExperiencia,
+                    self.posx + self.radio/2 + 14,
+                    self.posy + self.radio/2)
+        # Actualizar las posiciones del texto de nivel
+        lienzo.coords(self.entidadNivel,
+                    self.posx + self.radio / 2 + 11,
+                    self.posy)
+        
+        #Actualizar las posiciones de los jugadores:
         self.posx += math.cos(self.direccion)
         self.posy += math.sin(self.direccion)
+
 
     def colisiona(self):
         if self.posx <0 or self.posx > 1024 or self.posy < 0 or self.posy > 600:
@@ -83,10 +134,10 @@ class Persona:
     #CAMBIA EL COLOR DE LAS ENTIDADES DEPENDIENDO DEL CUADRANTE CARTESIANO QUE OCUPEN
     def cambiaColor(self):
         if self.posx < 512 and self.posy > 300:
-            self.color = "blue"
+            self.color = "green"
             lienzo.itemconfig(self.entidad, fill=self.color)
         elif self.posx > 512 and self.posy > 300:
-            self.color = "green"
+            self.color = "blue"
             lienzo.itemconfig(self.entidad, fill=self.color)
         elif self.posx < 512 and self.posy < 300:
             self.color = "black"
@@ -126,7 +177,7 @@ class Persona:
         for persona in personas:
             cursor.execute('''
                             INSERT INTO jugadores VALUES(
-                                NULL,?,?,?,?,?,?,?,?,?,?,?
+                                NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?
                             )
                            ''', (
                                persona.posx,
@@ -139,7 +190,11 @@ class Persona:
                                persona.energia,
                                persona.entidadEnergia,
                                persona.descanso,
-                               persona.entidadDescanso
+                               persona.entidadDescanso,
+                               persona.experiencia,
+                               persona.entidadExperiencia,
+                               persona.nivel,
+                               persona.entidadNivel
                            ))
         conexion.commit()
         conexion.close()
@@ -189,6 +244,10 @@ try:
         persona.entidadEnergia = fila[9]
         persona.descanso = fila[10]
         persona.entidadDescanso = fila[11]
+        persona.experiencia = fila[12]
+        persona.entidadExperiencia = fila[13]
+        persona.nivel = fila[14]
+        persona.entidadNivel = fila[15]
         personas.append(persona)
     conexion.close()
 except:
