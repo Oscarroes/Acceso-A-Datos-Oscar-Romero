@@ -78,10 +78,12 @@ class Persona:
             if self.posx < 512 and self.posy > 300:
                 self.descanso = 100
 
-        #Ganan más experiencia en la zona roja
+        #Ganan más experiencia en la zona roja y no la ganan en la verde
         self.experiencia += 0.001
         if self.posx > 512 and self.posy < 300:
             self.experiencia += 0.002
+        if self.posx < 512 and self.posy > 300:
+            self.experiencia += 0
 
         #SI LA EXPERIENCIA ES MAYOR QUE 2 -> NIVEL +1 Y SELF.EXPERIENCIA = 0
         if self.experiencia > 2:
