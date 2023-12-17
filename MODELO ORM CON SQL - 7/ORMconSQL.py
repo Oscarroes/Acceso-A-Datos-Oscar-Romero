@@ -49,7 +49,7 @@ class Persona:
             self.posy-self.radio/2-16,
             fill="red"
             )
-        #Lienzo experiencia
+
         self.entidadExperiencia = lienzo.create_rectangle(
             self.posx+self.radio/2 + 8,
             self.posy-self.radio/2,
@@ -85,7 +85,7 @@ class Persona:
         if self.posx < 512 and self.posy > 300:
             self.experiencia += 0
 
-        #SI LA EXPERIENCIA ES MAYOR QUE 2 -> NIVEL +1 Y SELF.EXPERIENCIA = 0
+        #SI LA EXPERIENCIA ES MAYOR QUE 2 -> SUBEN DE NIVEL
         if self.experiencia > 2:
             self.nivel +=1
             self.experiencia = 0
@@ -97,7 +97,7 @@ class Persona:
         lienzo.move(self.entidad,
                     math.cos(self.direccion),
                     math.sin(self.direccion))
-        #Las barras las vamos a mover con coordenadas referenciadas a la posición:
+        #Las barras se van a mover con coordenadas referenciadas a la posición:
         anchuraDescanso = (self.descanso/100)*self.radio  
         anchuraEnergia = (self.energia/100)*self.radio
         anchuraExperiencia = (self.experiencia-1)*self.radio
@@ -170,8 +170,7 @@ class Persona:
         #GUARDO LOS PERSONAJES EN SQL
         conexion = sqlite3.connect("jugadores.sqlite3")
         cursor = conexion.cursor()
-        #HAY QUE TRUNCAR LA TABLA CADA VEZ QUE GUARDEMOS LOS JUGADORES
-        #PORQUE SI NO ME VA A ESTAR METIENDO LOS JUGADORES QUE YA TENIA Y LOS CARGADOS AHORA COMO NUEVOS
+        #TRUNCAR LA TABLA CADA VEZ QUE GUARDEMOS LOS JUGADORES
         cursor.execute('''
                        DELETE FROM jugadores
                        ''')
@@ -234,7 +233,6 @@ try:
             break
         
         persona = Persona()
-        #LA POSICION 0 ES EL ID NO LA PONEMOS
         persona.posx = fila[1]
         persona.posy = fila[2]
         persona.radio = fila[3]
@@ -254,7 +252,6 @@ try:
     conexion.close()
 except:
     print("error al cargar la base de datos")
-
 
 #EN LA COLECCION INTRODUZCO INSTANCIAS DE PERSONAS EN EL CASO QUE NO EXISTAN
 if len (personas) == 0:
