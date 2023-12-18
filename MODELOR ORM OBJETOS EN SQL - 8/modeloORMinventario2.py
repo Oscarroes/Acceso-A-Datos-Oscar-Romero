@@ -216,17 +216,17 @@ class Persona:
         conexionJugadores.commit()
         conexionJugadores.close()
 
-        conexionBolsa = sqlite3.connect("jugadores.sqlite3")
-        cursorBolsa = conexionBolsa.cursor()
-        cursorBolsa.execute('DELETE FROM bolsa')
-        conexionBolsa.commit()
-        conexionBolsa.close()
+        # conexionBolsa = sqlite3.connect("jugadores.sqlite3")
+        # cursorBolsa = conexionBolsa.cursor()
+        # cursorBolsa.execute('DELETE FROM bolsa')
+        # conexionBolsa.commit()
+        # conexionBolsa.close()
 
-        conexionInventario = sqlite3.connect("jugadores.sqlite3")
-        cursorInventario = conexionInventario.cursor()
-        cursorInventario.execute('DELETE FROM inventario')
-        conexionInventario.commit()
-        conexionInventario.close()
+        # conexionInventario = sqlite3.connect("jugadores.sqlite3")
+        # cursorInventario = conexionInventario.cursor()
+        # cursorInventario.execute('DELETE FROM inventario')
+        # conexionInventario.commit()
+        # conexionInventario.close()
 
         conexionInsert = sqlite3.connect("jugadores.sqlite3")
         cursorInsert = conexionInsert.cursor()
@@ -254,17 +254,17 @@ class Persona:
                                persona.entidadNivel
                            ))
             #Obtener el id del jugador recién insertado
-            idjugador = cursorInsert.lastrowid
-            idjugador2 = idjugador
+            # idjugador = cursorInsert.lastrowid
+            # idjugador2 = cursorInsert.lastrowid 
 
             #GUARDAR EN LA TABLA DE BOLSA
             for bolsa in persona.listaObjetos:
                 cursorInsert.execute('''
-                            INSERT INTO bolsa VALUES(
-                                NULL,?,?,?,?
-                            )
+                            INSERT OR REPLACE INTO bolsa (idjugador,oro, gemaazul, gemanegra)
+                            VALUES ((SELECT id FROM jugadores WHERE posx=? AND posy=?),?,?,?)
                             ''', (
-                                idjugador,
+                                persona.posx,
+                                persona.posy,
                                 bolsa.oro,
                                 bolsa.gemaAzul,
                                 bolsa.gemaNegra
@@ -273,11 +273,11 @@ class Persona:
             #GUARDAR EN LA TABLA DE INVENTARIO
             for inventario in persona.listaEquipacion:
                 cursorInsert.execute('''
-                            INSERT INTO inventario VALUES(
-                                NULL,?,?,?,?,?
-                            )
+                            INSERT OR REPLACE INTO inventario (idjugador,arma,botas,casco,armadura)
+                            VALUES((SELECT id FROM jugadores WHERE posx=? AND posy=?),?,?,?,?)
                             ''', (
-                                idjugador2,
+                                persona.posx,
+                                persona.posy,
                                 inventario.arma,
                                 inventario.botas,
                                 inventario.casco,

@@ -209,31 +209,31 @@ class Persona:
     def guardarPersonas():
         print("Guardo a los jugadores")
         #GUARDO LOS PERSONAJES EN SQL
-        conexionJugadores = sqlite3.connect("jugadores.sqlite3")
-        cursorJugadores = conexionJugadores.cursor()
-        #TRUNCAR LA TABLA CADA VEZ QUE GUARDEMOS LOS JUGADORES
-        cursorJugadores.execute('DELETE FROM jugadores')
-        conexionJugadores.commit()
-        conexionJugadores.close()
+        # conexionJugadores = sqlite3.connect("jugadores.sqlite3")
+        # cursorJugadores = conexionJugadores.cursor()
+        # #TRUNCAR LA TABLA CADA VEZ QUE GUARDEMOS LOS JUGADORES
+        # cursorJugadores.execute('DELETE FROM jugadores')
+        # conexionJugadores.commit()
+        # conexionJugadores.close()
 
-        conexionBolsa = sqlite3.connect("jugadores.sqlite3")
-        cursorBolsa = conexionBolsa.cursor()
-        cursorBolsa.execute('DELETE FROM bolsa')
-        conexionBolsa.commit()
-        conexionBolsa.close()
+        # conexionBolsa = sqlite3.connect("jugadores.sqlite3")
+        # cursorBolsa = conexionBolsa.cursor()
+        # cursorBolsa.execute('DELETE FROM bolsa')
+        # conexionBolsa.commit()
+        # conexionBolsa.close()
 
-        conexionInventario = sqlite3.connect("jugadores.sqlite3")
-        cursorInventario = conexionInventario.cursor()
-        cursorInventario.execute('DELETE FROM inventario')
-        conexionInventario.commit()
-        conexionInventario.close()
+        # conexionInventario = sqlite3.connect("jugadores.sqlite3")
+        # cursorInventario = conexionInventario.cursor()
+        # cursorInventario.execute('DELETE FROM inventario')
+        # conexionInventario.commit()
+        # conexionInventario.close()
 
         conexionInsert = sqlite3.connect("jugadores.sqlite3")
         cursorInsert = conexionInsert.cursor()
 
         for persona in personas:
             cursorInsert.execute('''
-                            INSERT INTO jugadores VALUES(
+                            INSERT OR REPLACE INTO jugadores VALUES(
                                 NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?
                             )
                            ''', (
@@ -255,14 +255,13 @@ class Persona:
                            ))
             #Obtener el id del jugador recién insertado
             idjugador = cursorInsert.lastrowid
-            idjugador2 = idjugador
+            # idjugador2 = cursorInsert.lastrowid 
 
             #GUARDAR EN LA TABLA DE BOLSA
             for bolsa in persona.listaObjetos:
                 cursorInsert.execute('''
-                            INSERT INTO bolsa VALUES(
-                                NULL,?,?,?,?
-                            )
+                            INSERT OR REPLACE INTO bolsa (idjugador,oro, gemaazul, gemanegra)
+                            VALUES (?, ?, ?, ?)
                             ''', (
                                 idjugador,
                                 bolsa.oro,
@@ -273,11 +272,10 @@ class Persona:
             #GUARDAR EN LA TABLA DE INVENTARIO
             for inventario in persona.listaEquipacion:
                 cursorInsert.execute('''
-                            INSERT INTO inventario VALUES(
-                                NULL,?,?,?,?,?
-                            )
+                            INSERT OR REPLACE INTO inventario (idjugador,arma,botas,casco,armadura)
+                            VALUES (?, ?, ?, ?, ?)
                             ''', (
-                                idjugador2,
+                                idjugador,
                                 inventario.arma,
                                 inventario.botas,
                                 inventario.casco,
@@ -339,16 +337,15 @@ try:
         cursor2.execute('''
                 SELECT * 
                 FROM bolsa
-                WHERE idjugador = ?
-                ''', (fila[0],))
+                ''')
         while True:
             fila2 = cursor2.fetchone()
             if fila2 is None:
                 break
             nuevoBolsa = Bolsa()
-            nuevoBolsa.oro = fila2[2]
-            nuevoBolsa.gemaAzul = fila2[3]
-            nuevoBolsa.gemaNegra = fila2[4]
+            nuevoBolsa.oro = fila2[1]
+            nuevoBolsa.gemaAzul = fila2[2]
+            nuevoBolsa.gemaNegra = fila2[3]
             persona.listaObjetos.append(nuevoBolsa)
         #TRAEMOS LOS DATOS DE LA TABLA INVENTARIO
 
@@ -356,17 +353,16 @@ try:
         cursor3.execute('''
                 SELECT * 
                 FROM inventario
-                WHERE idjugador2 = ?
-                ''', (fila[0],))
+                ''')
         while True:
             fila3 = cursor3.fetchone()
             if fila3 is None:
                 break
             nuevaEquipacion = Inventario()
-            nuevaEquipacion.arma = fila3[2]
-            nuevaEquipacion.botas = fila3[3]
-            nuevaEquipacion.casco = fila3[4]
-            nuevaEquipacion.armadura = fila3[5]
+            nuevaEquipacion.arma = fila3[1]
+            nuevaEquipacion.botas = fila3[2]
+            nuevaEquipacion.casco = fila3[3]
+            nuevaEquipacion.armadura = fila3[4]
             persona.listaEquipacion.append(nuevaEquipacion)
         personas.append(persona)
     conexion.close()
