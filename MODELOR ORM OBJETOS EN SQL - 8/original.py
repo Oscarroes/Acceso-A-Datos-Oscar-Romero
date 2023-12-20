@@ -105,7 +105,7 @@ class Persona:
             self.miBolsa.gemaNegra = "Gema Negra"
         if self.posx > 768 and self.posy > 450 and not self.miBolsa.gemaAzul:
             self.miBolsa.gemaAzul = "Gema Azul"
-        
+
 
         #Ganan más experiencia en la zona roja y no la ganan en la verde
         self.experiencia += 0.001
@@ -120,18 +120,18 @@ class Persona:
             self.experiencia = 0
             self.miBolsa.oro += 5
             #SEGÚN SUBEN DE NIVEL VAN CONSIGUIENDO OBJETOS DEL INVENTARIO:
-            if self.nivel >= 3:
+            if self.nivel == 3:
                 self.miEquipacion.arma = "Espada de bronce"
                 self.miEquipacion.botas = "Botas de cuero"
-            if self.nivel >= 5:
+            if self.nivel == 5:
                 self.miEquipacion.casco = "Casco ligero"
                 self.miEquipacion.armadura = "Armadura de tela"
-        
-            
-            
+
+
+
             # Actualizar el texto del nivel después de aumentar
             lienzo.itemconfig(self.entidadNivel, text=str(round(self.nivel)))
-        
+
         self.colisiona()
         self.cambiaColor()
         lienzo.move(self.entidad,
@@ -147,13 +147,13 @@ class Persona:
                     self.posy - self.radio/2 - 14,
                     self.posx - self.radio/2 + anchuraEnergia,
                     self.posy - self.radio/2 - 8)
-              
+
         lienzo.coords(self.entidadDescanso,
                     self.posx - self.radio/2,
                     self.posy - self.radio/2 - 22,
                     self.posx - self.radio/2 + anchuraDescanso,
                     self.posy - self.radio/2 - 16)
-        
+
         lienzo.coords(self.entidadExperiencia,
                     self.posx + self.radio/2 + 8,
                     self.posy - self.radio/2 - anchuraExperiencia,
@@ -163,7 +163,7 @@ class Persona:
         lienzo.coords(self.entidadNivel,
                     self.posx + self.radio / 2 + 11,
                     self.posy)
-        
+
         #Actualizar las posiciones de los jugadores:
         self.posx += math.cos(self.direccion)
         self.posy += math.sin(self.direccion)
@@ -216,17 +216,17 @@ class Persona:
         conexionJugadores.commit()
         conexionJugadores.close()
 
-        # conexionBolsa = sqlite3.connect("jugadores.sqlite3")
-        # cursorBolsa = conexionBolsa.cursor()
-        # cursorBolsa.execute('DELETE FROM bolsa')
-        # conexionBolsa.commit()
-        # conexionBolsa.close()
+        conexionBolsa = sqlite3.connect("jugadores.sqlite3")
+        cursorBolsa = conexionBolsa.cursor()
+        cursorBolsa.execute('DELETE FROM bolsa')
+        conexionBolsa.commit()
+        conexionBolsa.close()
 
-        # conexionInventario = sqlite3.connect("jugadores.sqlite3")
-        # cursorInventario = conexionInventario.cursor()
-        # cursorInventario.execute('DELETE FROM inventario')
-        # conexionInventario.commit()
-        # conexionInventario.close()
+        conexionInventario = sqlite3.connect("jugadores.sqlite3")
+        cursorInventario = conexionInventario.cursor()
+        cursorInventario.execute('DELETE FROM inventario')
+        conexionInventario.commit()
+        conexionInventario.close()
 
         conexionInsert = sqlite3.connect("jugadores.sqlite3")
         cursorInsert = conexionInsert.cursor()
@@ -254,30 +254,29 @@ class Persona:
                                persona.entidadNivel
                            ))
             #Obtener el id del jugador recién insertado
-            # idjugador = cursorInsert.lastrowid
-            # idjugador2 = cursorInsert.lastrowid 
-
+            idjugador = cursorInsert.lastrowid
+            # Vaciar la lista de objetos antes de agregar nuevos desde la base de datos
+            #persona.listaObjetos = []
             #GUARDAR EN LA TABLA DE BOLSA
             for bolsa in persona.listaObjetos:
                 cursorInsert.execute('''
-                            INSERT OR REPLACE INTO bolsa (idjugador,oro, gemaazul, gemanegra)
-                            VALUES ((SELECT id FROM jugadores WHERE posx=? AND posy=?),?,?,?)
+                            INSERT INTO bolsa VALUES(
+                                NULL,?,?,?,?
+                            )
                             ''', (
-                                persona.posx,
-                                persona.posy,
+                                idjugador,
                                 bolsa.oro,
                                 bolsa.gemaAzul,
                                 bolsa.gemaNegra
                             ))
-            # idjugador = cursorInsert.lastrowid  
             #GUARDAR EN LA TABLA DE INVENTARIO
             for inventario in persona.listaEquipacion:
                 cursorInsert.execute('''
-                            INSERT OR REPLACE INTO inventario (idjugador,arma,botas,casco,armadura)
-                            VALUES((SELECT id FROM jugadores WHERE posx=? AND posy=?),?,?,?,?)
+                            INSERT INTO inventario VALUES(
+                                NULL,?,?,?,?,?
+                            )
                             ''', (
-                                persona.posx,
-                                persona.posy,
+                                idjugador,
                                 inventario.arma,
                                 inventario.botas,
                                 inventario.casco,
@@ -285,7 +284,7 @@ class Persona:
                             ))
         conexionInsert.commit()
         conexionInsert.close()
-     
+
 #CREAMOS LA VENTANA
 raiz = tk.Tk()
 raiz.geometry("1024x600")
@@ -316,7 +315,7 @@ try:
         fila = cursor.fetchone()
         if fila is None:
             break
-        
+
         persona = Persona()
         persona.posx = fila[1]
         persona.posy = fila[2]
@@ -333,6 +332,8 @@ try:
         persona.entidadExperiencia = fila[13]
         persona.nivel = fila[14]
         persona.entidadNivel = fila[15]
+        # Vaciar la lista de objetos antes de agregar nuevos desde la base de datos
+        
 
         #TRAEMOS LOS DATOS DE LA TABLA BOLSA
         cursor2 = conexion.cursor()
@@ -349,27 +350,9 @@ try:
             nuevoBolsa.oro = fila2[2]
             nuevoBolsa.gemaAzul = fila2[3]
             nuevoBolsa.gemaNegra = fila2[4]
-            
+            persona.listaObjetos = []
             persona.listaObjetos.append(nuevoBolsa)
         #TRAEMOS LOS DATOS DE LA TABLA INVENTARIO
-
-        cursor3 = conexion.cursor()
-        cursor3.execute('''
-                SELECT * 
-                FROM inventario
-                WHERE idjugador2 = ?
-                ''', (fila[0],))
-        while True:
-            fila3 = cursor3.fetchone()
-            if fila3 is None:
-                break
-            nuevaEquipacion = Inventario()
-            nuevaEquipacion.arma = fila3[2]
-            nuevaEquipacion.botas = fila3[3]
-            nuevaEquipacion.casco = fila3[4]
-            nuevaEquipacion.armadura = fila3[5]
-
-            persona.listaEquipacion.append(nuevaEquipacion)
         personas.append(persona)
     conexion.close()
 except:
