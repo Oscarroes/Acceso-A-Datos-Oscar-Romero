@@ -99,9 +99,10 @@ class Persona:
                 self.descanso = 100
 
         #ZONA DE OBTENCIÓN DE GEMAS NEGRA Y AZUL:
-        if self.posx < 256 and self.posy < 150 and not self.miBolsa.gemaNegra:
+        if self.posx < 512 and self.posy < 300 and not self.miBolsa.gemaNegra:
             self.miBolsa.gemaNegra = "Gema Negra"
-        if self.posx > 768 and self.posy > 450 and not self.miBolsa.gemaAzul:
+
+        if self.posx > 512 and self.posy > 300 and not self.miBolsa.gemaAzul:
             self.miBolsa.gemaAzul = "Gema Azul"
         
         #ZONA ROJA - SE GANA MÁS EXPERIENCIA
@@ -111,7 +112,7 @@ class Persona:
         if self.posx < 512 and self.posy > 300:
             self.experiencia += 0
 
-        #SI EXPERIENCIA ES MAYOR QUE 2 -> SUBEN DE NIVEL Y +5 DE ORO
+        #SI EXPERIENCIA ES MAYOR QUE 2 -> SUBEN DE NIVEL Y OBTIENEN +5 DE ORO
         if self.experiencia > 2:
             self.nivel +=1
             self.experiencia = 0
@@ -307,6 +308,7 @@ boton.pack(padx=10,pady=10)
 try:
     conexion = sqlite3.connect("jugadores.sqlite3")
     cursor = conexion.cursor()
+    
     cursor.execute('''
                    SELECT * 
                    FROM jugadores
@@ -333,6 +335,9 @@ try:
         persona.nivel = fila[14]
         persona.entidadNivel = fila[15]
 
+        persona.listaObjetos.clear()
+        persona.listaEquipacion.clear()
+
         #TRAEMOS LOS DATOS DE LA TABLA BOLSA
         cursor2 = conexion.cursor()
         cursor2.execute('''
@@ -348,6 +353,8 @@ try:
             nuevoBolsa.oro = fila2[1]
             nuevoBolsa.gemaAzul = fila2[2]
             nuevoBolsa.gemaNegra = fila2[3]
+            persona.miBolsa = nuevoBolsa
+            persona.listaObjetos.append(nuevoBolsa)
 
         #TRAEMOS LOS DATOS DE LA TABLA INVENTARIO
         cursor3 = conexion.cursor()
@@ -365,6 +372,8 @@ try:
             nuevaEquipacion.botas = fila3[2]
             nuevaEquipacion.casco = fila3[3]
             nuevaEquipacion.armadura = fila3[4]
+            persona.miEquipacion = nuevaEquipacion
+            persona.listaEquipacion.append(nuevaEquipacion)
             
         #SE AGREGAN TODOS LOS DATOS A CADA UNA DE LAS PERSONAS
         personas.append(persona)

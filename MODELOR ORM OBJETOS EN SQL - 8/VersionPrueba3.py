@@ -118,14 +118,16 @@ class Persona:
         if self.experiencia > 2:
             self.nivel +=1
             self.experiencia = 0
-            self.miBolsa.oro += 5
+            
             #SEGÚN SUBEN DE NIVEL VAN CONSIGUIENDO OBJETOS DEL INVENTARIO:
             if self.nivel >= 3:
                 self.miEquipacion.arma = "Espada de bronce"
                 self.miEquipacion.botas = "Botas de cuero"
+                self.miBolsa.oro = self.miBolsa.oro + 10
             if self.nivel >= 5:
                 self.miEquipacion.casco = "Casco ligero"
                 self.miEquipacion.armadura = "Armadura de tela"
+                self.miBolsa.oro = self.miBolsa.oro + 20
         
             
             
