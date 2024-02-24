@@ -12,7 +12,7 @@ var agenda = [
 },
 
     {
-        "nombre":"Oscar",
+        "nombre":"Juan",
         "telefono":123456,
         "email":[
             "info.oscar@gmail.com",
@@ -22,7 +22,7 @@ var agenda = [
 },
 
     {
-        "nombre":"Oscar",
+        "nombre":"Jorge",
         "telefono":123456,
         "email":[
             "info.oscar@gmail.com",

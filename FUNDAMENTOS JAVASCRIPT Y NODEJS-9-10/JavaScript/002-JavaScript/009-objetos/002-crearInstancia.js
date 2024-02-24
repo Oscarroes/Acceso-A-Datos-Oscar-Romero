@@ -5,4 +5,5 @@ class Persona{
 }
 
 var persona1 = new Persona();
+var persona2 = new Persona();
 console.log(persona1);

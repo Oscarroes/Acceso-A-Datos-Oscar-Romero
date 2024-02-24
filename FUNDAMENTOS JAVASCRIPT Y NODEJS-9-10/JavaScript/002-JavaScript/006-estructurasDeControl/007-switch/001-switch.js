@@ -1,4 +1,4 @@
-var diaDeLaSemana = "domingo";
+var diaDeLaSemana = "midasndisand";
 
 switch(diaDeLaSemana){
     case "lunes":

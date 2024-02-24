@@ -8,5 +8,5 @@ Es recomendable declarar las constantes en MAYUSCULAS
 */
 
 const PI = Math.PI;
-// PI = 16; poner esto nos va a dar un error.
+//PI = 16; //poner esto nos va a dar un error.
 console.log("El valor de PI es de: " + PI);
