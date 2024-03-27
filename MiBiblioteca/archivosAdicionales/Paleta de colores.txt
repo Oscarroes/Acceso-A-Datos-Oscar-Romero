@@ -1,0 +1,7 @@
+Opcion 1
+# #2E324C - #4C2E41 fondo azul borde morado - nuevo
+# #F6FFF9 - "#636E67" antiguo fondo blanco con borde gris - antiguo
+# botones antiguo #75CB92 fg_color="#8C26CE" - nuevo  #42594B
+
+
+
